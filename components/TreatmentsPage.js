@@ -1,5 +1,6 @@
+import Constants from 'expo-constants';
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const categories = [
   { key: 'all', label: 'Tümü' },
@@ -77,8 +78,10 @@ const TreatmentsPage = () => {
   const [search, setSearch] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('Tümü');
 
+  const statusBarHeight = Platform.OS === 'android' ? Constants.statusBarHeight : 0;
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { paddingTop: statusBarHeight + 10 }]}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoRow}>

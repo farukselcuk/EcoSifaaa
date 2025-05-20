@@ -5,8 +5,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 const tabs = [
   { name: 'Anasayfa', route: '/', icon: '🏠' },
   { name: 'Tedaviler', route: '/(tabs)/explore', icon: '📚' },
-  { name: 'Öneri Al', route: '#', icon: '📝' },
-  { name: 'Profil', route: '#', icon: '👤' },
+  { name: 'Öneri Al', route: '/(tabs)/suggestion', icon: '📝' },
+  { name: 'Profil', route: '/(tabs)/profile', icon: '👤' },
 ];
 
 const BottomNavBar = () => {
@@ -17,7 +17,12 @@ const BottomNavBar = () => {
   return (
     <View style={styles.bar}>
       {tabs.map((tab, idx) => {
-        const isActive = (tab.route === '/' && (current === 'index' || current === undefined)) || (tab.route.includes(current) && tab.route !== '/');
+        const isActive = (
+          (tab.route === '/' && (current === 'index' || current === undefined)) ||
+          (tab.route === '/(tabs)/explore' && current === 'explore') ||
+          (tab.route === '/(tabs)/suggestion' && current === 'suggestion') ||
+          (tab.route === '/(tabs)/profile' && current === 'profile')
+        );
         return (
           <TouchableOpacity
             key={tab.name}

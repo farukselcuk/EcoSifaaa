@@ -1,11 +1,14 @@
+import Constants from 'expo-constants';
 import React from "react";
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const windowHeight = Dimensions.get('window').height;
 
 const HomePage = () => {
+  const statusBarHeight = Platform.OS === 'android' ? Constants.statusBarHeight : 0;
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120, minHeight: windowHeight }}>
+    <ScrollView style={[styles.container, { paddingTop: statusBarHeight + 10 }]} contentContainerStyle={{ paddingBottom: 120, minHeight: windowHeight }}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoRow}>

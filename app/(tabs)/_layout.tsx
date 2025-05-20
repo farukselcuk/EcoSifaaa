@@ -33,6 +33,20 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="cross.case.fill" color={color} />,
           }}
         />
+        <Tabs.Screen
+          name="suggestion"
+          options={{
+            title: 'Öneri Al',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar.badge.plus" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Profil',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+          }}
+        />
       </Tabs>
       <BottomNavBar />
     </>
