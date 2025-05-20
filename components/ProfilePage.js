@@ -99,7 +99,7 @@ const ProfilePage = () => {
   const statusBarHeight = Platform.OS === 'android' ? Constants.statusBarHeight : 0;
 
   return (
-    <ScrollView style={[styles.container, { paddingTop: statusBarHeight + 10 }]} contentContainerStyle={{ paddingBottom: 120 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }}>
       {/* Header */}
       <View style={styles.header}>
         {/* TODO: Add back button */}
@@ -194,49 +194,49 @@ const ProfilePage = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#00c97b' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#4CAF50' },
   logoRow: { flexDirection: 'row', alignItems: 'center' },
-  logoIcon: { backgroundColor: '#e6fff2', borderRadius: 20, width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
-  logoIconText: { color: '#00c97b', fontSize: 24, fontWeight: 'bold' },
+  logoIcon: { backgroundColor: '#E8F5E9', borderRadius: 20, width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  logoIconText: { color: '#4CAF50', fontSize: 24, fontWeight: 'bold' },
   logoTitle: { fontWeight: 'bold', fontSize: 18, color: '#fff' },
   logoDesc: { fontSize: 13, color: '#fff', opacity: 0.8 },
   headerIcons: { flexDirection: 'row' },
   headerIcon: { fontSize: 22, marginLeft: 16, color: '#fff' },
 
-  profileSummary: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#00c97b' },
-  avatarPlaceholder: { backgroundColor: '#e6fff2', borderRadius: 30, width: 60, height: 60, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
-  avatarText: { color: '#00c97b', fontSize: 28, fontWeight: 'bold' },
+  profileSummary: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#4CAF50' },
+  avatarPlaceholder: { backgroundColor: '#E8F5E9', borderRadius: 30, width: 60, height: 60, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+  avatarText: { color: '#4CAF50', fontSize: 28, fontWeight: 'bold' },
   profileName: { fontWeight: 'bold', fontSize: 18, color: '#fff' },
   profileEmail: { fontSize: 14, color: '#fff', opacity: 0.8 },
 
-  completionBox: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginHorizontal: 16, marginTop: -30, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, elevation: 5 },
+  completionBox: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginHorizontal: 16, marginTop: -30, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 5 },
   completionTitle: { fontWeight: 'bold', fontSize: 16, marginBottom: 4, color: '#333' },
-  completionText: { color: '#888', fontSize: 13, marginBottom: 12 },
-  completeProfileBtn: { backgroundColor: '#00c97b', borderRadius: 20, paddingVertical: 12, alignItems: 'center' },
+  completionText: { color: '#666666', fontSize: 13, marginBottom: 12 },
+  completeProfileBtn: { backgroundColor: '#4CAF50', borderRadius: 20, paddingVertical: 12, alignItems: 'center', shadowColor: '#4CAF50', shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
   completeProfileBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 
   tabContentScroll: { paddingHorizontal: 16 },
   tabContentPadding: { paddingBottom: 20 },
 
   inputLabel: { fontSize: 14, color: '#555', marginTop: 16, marginBottom: 4 },
-  input: { backgroundColor: '#fff', borderRadius: 12, padding: 12, fontSize: 16, borderWidth: 1, borderColor: '#eee' },
+  input: { backgroundColor: '#fff', borderRadius: 12, padding: 12, fontSize: 16, borderWidth: 1, borderColor: '#E0E0E0' },
 
   tagRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 4 },
-  tag: { flexDirection: 'row', backgroundColor: '#e6fff2', color: '#00c97b', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 10, marginRight: 8, marginBottom: 8, alignItems: 'center' },
-  addButton: { backgroundColor: '#00c97b', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 10, marginBottom: 8 },
+  tag: { flexDirection: 'row', backgroundColor: '#E8F5E9', color: '#4CAF50', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 10, marginRight: 8, marginBottom: 8, alignItems: 'center' },
+  addButton: { backgroundColor: '#4CAF50', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 10, marginBottom: 8 },
   addButtonText: { color: '#fff', fontWeight: 'bold' },
 
   preferenceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: '#eee' },
 
   section: { marginHorizontal: 16, marginTop: 24 },
-  sectionTitle: { fontWeight: 'bold', fontSize: 16, marginBottom: 12 },
-  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderColor: '#eee' },
+  sectionTitle: { fontWeight: 'bold', fontSize: 16, marginBottom: 12, color: '#333' },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderColor: '#E0E0E0' },
   menuItemText: { flex: 1, fontSize: 16, color: '#333' },
-  menuItemArrow: { fontSize: 18, color: '#ccc', marginLeft: 8 },
-  menuItemTag: { backgroundColor: '#e6fff2', color: '#00c97b', borderRadius: 8, paddingHorizontal: 6, fontSize: 12, marginRight: 8, fontWeight: 'bold' },
+  menuItemArrow: { fontSize: 18, color: '#E0E0E0', marginLeft: 8 },
+  menuItemTag: { backgroundColor: '#E8F5E9', color: '#4CAF50', borderRadius: 8, paddingHorizontal: 6, fontSize: 12, marginRight: 8, fontWeight: 'bold' },
 
-  logoutButton: { backgroundColor: '#fff', borderRadius: 16, paddingVertical: 14, marginHorizontal: 16, marginTop: 24, alignItems: 'center', borderWidth: 1, borderColor: '#eee' },
-  logoutButtonText: { color: '#ff4d4f', fontWeight: 'bold', fontSize: 16 },
+  logoutButton: { backgroundColor: '#fff', borderRadius: 16, paddingVertical: 14, marginHorizontal: 16, marginTop: 24, alignItems: 'center', borderWidth: 1, borderColor: '#E0E0E0' },
+  logoutButtonText: { color: '#FF5252', fontWeight: 'bold', fontSize: 16 },
 });
 
 export default ProfilePage; 
