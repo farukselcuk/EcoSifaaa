@@ -4,7 +4,13 @@ function SuggestionPage() {
   const [currentStep, setCurrentStep] = useState(1); // Start at step 1
   const [selectedSymptoms, setSelectedSymptoms] = useState([]); // State to hold selected symptom names
   const [activeLifestyleTab, setActiveLifestyleTab] = useState('Beslenme'); // State for lifestyle tabs
-  const [suggestions, setSuggestions] = useState([]); // State to hold fetched suggestions
+  const [suggestions, setSuggestions] = useState({
+    naturalTreatments: [],
+    nutritionAdvice: [],
+    lifestyleChanges: [],
+    supplements: [],
+    precautions: []
+  });
   const [loading, setLoading] = useState(false); // State for loading indicator
   const [error, setError] = useState(null); // State for errors
   const [symptomDetails, setSymptomDetails] = useState({}); // State to hold details for each selected symptom
@@ -90,18 +96,52 @@ function SuggestionPage() {
     }
   };
 
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/suggestions/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symptoms: selectedSymptoms,
+          symptomDetails: symptomDetails,
+          lifestyleDetails: lifestyleDetails
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Öneriler alınırken bir hata oluştu');
+      }
+
+      setSuggestions(data.data);
+      setCurrentStep(4); // Move to results step
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Green Banner Section */}
       <section style={{
-        backgroundColor: '#4CAF50', // Yeşil arka plan
+        backgroundColor: '#4CAF50',
         color: 'white',
-        padding: '3rem 0', // Üst ve alt dolgu
+        padding: '3rem 0',
         textAlign: 'center',
+        width: '100%',
       }}>
-        <div className="container">
+        <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
           <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'white' }}>Kişiselleştirilmiş Tedavi Önerileri</h1>
-          <p style={{ fontSize: '1.1rem', opacity: 0.9, color: 'white' }}>
+          <p style={{ fontSize: '1.1rem', opacity: 0.9, color: 'white', maxWidth: '800px', margin: '0 auto' }}>
             Semptomlarınızı ve sağlık durumunuzu değerlendirerek size özel alternatif tedavi önerileri sunuyoruz. Doğal yollarla iyileşme yolculuğunuz burada başlıyor.
           </p>
         </div>
@@ -110,6 +150,8 @@ function SuggestionPage() {
       {/* Stepper Component */}
       <div className="container" style={{
         padding: '2rem 0',
+        maxWidth: '1200px',
+        margin: '0 auto',
       }}>
         <div style={{
           display: 'flex',
@@ -187,7 +229,11 @@ function SuggestionPage() {
 
       {/* Step 1: Symptom Selection */}
       {currentStep === 1 && (
-        <section className="container" style={{ padding: '2rem 0' }}>
+        <section className="container" style={{ 
+          padding: '2rem 0',
+          maxWidth: '1200px',
+          margin: '0 auto',
+        }}>
           <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#222' }}>Hangi semptomları yaşıyorsunuz?</h2>
           <p style={{ marginBottom: '2rem', color: '#666' }}>Lütfen yaşadığınız semptomları seçin. Birden fazla seçim yapabilirsiniz.</p>
 
@@ -223,7 +269,11 @@ function SuggestionPage() {
 
       {/* Step 2: Symptom Details */}
       {currentStep === 2 && (
-        <section className="container" style={{ padding: '2rem 0' }}>
+        <section className="container" style={{ 
+          padding: '2rem 0',
+          maxWidth: '1200px',
+          margin: '0 auto',
+        }}>
           <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#222' }}>Semptomlarınız hakkında detaylı bilgi</h2>
           <p style={{ marginBottom: '2rem', color: '#666' }}>Lütfen semptomlarınızla ilgili aşağıdaki soruları yanıtlayın.</p>
 
@@ -787,6 +837,515 @@ function SuggestionPage() {
                  );
 
               // Add cases for other symptoms here
+              case 'Bağışıklık Sorunları':
+                return (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Süre</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.duration || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, duration: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="1-3 gün">1-3 gün</option>
+                        <option value="4-7 gün">4-7 gün</option>
+                        <option value="1-2 hafta">1-2 hafta</option>
+                        <option value="2 haftadan fazla">2 haftadan fazla</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Şiddet</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.severity || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, severity: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="Hafif">Hafif</option>
+                        <option value="Orta">Orta</option>
+                        <option value="Şiddetli">Şiddetli</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Spesifik Belirtiler</label>
+                      <div className="mt-2 space-y-2">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Sık hastalanma') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Sık hastalanma');
+                              } else {
+                                const index = symptoms.indexOf('Sık hastalanma');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Sık hastalanma</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Yorgunluk') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Yorgunluk');
+                              } else {
+                                const index = symptoms.indexOf('Yorgunluk');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Yorgunluk</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Ateş') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Ateş');
+                              } else {
+                                const index = symptoms.indexOf('Ateş');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Ateş</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Ek Bilgiler</label>
+                      <textarea
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        rows="3"
+                        value={symptomDetails.additionalInfo || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, additionalInfo: e.target.value })}
+                        placeholder="Eklemek istediğiniz başka bilgiler var mı?"
+                      ></textarea>
+                    </div>
+                  </div>
+                );
+              case 'Sindirim Sorunları':
+                return (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Süre</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.duration || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, duration: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="1-3 gün">1-3 gün</option>
+                        <option value="4-7 gün">4-7 gün</option>
+                        <option value="1-2 hafta">1-2 hafta</option>
+                        <option value="2 haftadan fazla">2 haftadan fazla</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Şiddet</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.severity || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, severity: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="Hafif">Hafif</option>
+                        <option value="Orta">Orta</option>
+                        <option value="Şiddetli">Şiddetli</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Spesifik Belirtiler</label>
+                      <div className="mt-2 space-y-2">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Mide ağrısı') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Mide ağrısı');
+                              } else {
+                                const index = symptoms.indexOf('Mide ağrısı');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Mide ağrısı</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Bulantı') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Bulantı');
+                              } else {
+                                const index = symptoms.indexOf('Bulantı');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Bulantı</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('İshal') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('İshal');
+                              } else {
+                                const index = symptoms.indexOf('İshal');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">İshal</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Kabızlık') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Kabızlık');
+                              } else {
+                                const index = symptoms.indexOf('Kabızlık');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Kabızlık</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Ek Bilgiler</label>
+                      <textarea
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        rows="3"
+                        value={symptomDetails.additionalInfo || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, additionalInfo: e.target.value })}
+                        placeholder="Eklemek istediğiniz başka bilgiler var mı?"
+                      ></textarea>
+                    </div>
+                  </div>
+                );
+              case 'Cilt Sorunları':
+                return (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Süre</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.duration || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, duration: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="1-3 gün">1-3 gün</option>
+                        <option value="4-7 gün">4-7 gün</option>
+                        <option value="1-2 hafta">1-2 hafta</option>
+                        <option value="2 haftadan fazla">2 haftadan fazla</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Şiddet</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.severity || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, severity: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="Hafif">Hafif</option>
+                        <option value="Orta">Orta</option>
+                        <option value="Şiddetli">Şiddetli</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Spesifik Belirtiler</label>
+                      <div className="mt-2 space-y-2">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Kızarıklık') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Kızarıklık');
+                              } else {
+                                const index = symptoms.indexOf('Kızarıklık');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Kızarıklık</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Kaşıntı') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Kaşıntı');
+                              } else {
+                                const index = symptoms.indexOf('Kaşıntı');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Kaşıntı</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Döküntü') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Döküntü');
+                              } else {
+                                const index = symptoms.indexOf('Döküntü');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Döküntü</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Ek Bilgiler</label>
+                      <textarea
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        rows="3"
+                        value={symptomDetails.additionalInfo || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, additionalInfo: e.target.value })}
+                        placeholder="Eklemek istediğiniz başka bilgiler var mı?"
+                      ></textarea>
+                    </div>
+                  </div>
+                );
+              case 'Enerji Eksikliği':
+                return (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Süre</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.duration || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, duration: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="1-3 gün">1-3 gün</option>
+                        <option value="4-7 gün">4-7 gün</option>
+                        <option value="1-2 hafta">1-2 hafta</option>
+                        <option value="2 haftadan fazla">2 haftadan fazla</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Şiddet</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.severity || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, severity: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="Hafif">Hafif</option>
+                        <option value="Orta">Orta</option>
+                        <option value="Şiddetli">Şiddetli</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Spesifik Belirtiler</label>
+                      <div className="mt-2 space-y-2">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Yorgunluk') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Yorgunluk');
+                              } else {
+                                const index = symptoms.indexOf('Yorgunluk');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Yorgunluk</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Halsizlik') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Halsizlik');
+                              } else {
+                                const index = symptoms.indexOf('Halsizlik');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Halsizlik</span>
+                        </label>
+                        <br />
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            checked={symptomDetails.specificSymptoms?.includes('Konsantrasyon güçlüğü') || false}
+                            onChange={(e) => {
+                              const symptoms = symptomDetails.specificSymptoms || [];
+                              if (e.target.checked) {
+                                symptoms.push('Konsantrasyon güçlüğü');
+                              } else {
+                                const index = symptoms.indexOf('Konsantrasyon güçlüğü');
+                                if (index > -1) {
+                                  symptoms.splice(index, 1);
+                                }
+                              }
+                              setSymptomDetails({ ...symptomDetails, specificSymptoms: symptoms });
+                            }}
+                          />
+                          <span className="ml-2">Konsantrasyon güçlüğü</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Ek Bilgiler</label>
+                      <textarea
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        rows="3"
+                        value={symptomDetails.additionalInfo || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, additionalInfo: e.target.value })}
+                        placeholder="Eklemek istediğiniz başka bilgiler var mı?"
+                      ></textarea>
+                    </div>
+                  </div>
+                );
+              case 'Diğer':
+                return (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Süre</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.duration || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, duration: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="1-3 gün">1-3 gün</option>
+                        <option value="4-7 gün">4-7 gün</option>
+                        <option value="1-2 hafta">1-2 hafta</option>
+                        <option value="2 haftadan fazla">2 haftadan fazla</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Şiddet</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value={symptomDetails.severity || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, severity: e.target.value })}
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="Hafif">Hafif</option>
+                        <option value="Orta">Orta</option>
+                        <option value="Şiddetli">Şiddetli</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Spesifik Belirtiler</label>
+                      <textarea
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        rows="3"
+                        value={symptomDetails.specificSymptoms || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, specificSymptoms: e.target.value })}
+                        placeholder="Lütfen belirtilerinizi detaylı bir şekilde açıklayın."
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Ek Bilgiler</label>
+                      <textarea
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        rows="3"
+                        value={symptomDetails.additionalInfo || ''}
+                        onChange={(e) => setSymptomDetails({ ...symptomDetails, additionalInfo: e.target.value })}
+                        placeholder="Eklemek istediğiniz başka bilgiler var mı?"
+                      ></textarea>
+                    </div>
+                  </div>
+                );
               default:
                 return (
                   <div key={symptomName} style={{
@@ -822,7 +1381,11 @@ function SuggestionPage() {
 
       {/* Step 3: Lifestyle */}
       {currentStep === 3 && (
-        <section className="container" style={{ padding: '2rem 0' }}>
+        <section className="container" style={{ 
+          padding: '2rem 0',
+          maxWidth: '1200px',
+          margin: '0 auto',
+        }}>
           <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#222' }}>Yaşam Tarzınız hakkında bilgi</h2>
           <p style={{ marginBottom: '2rem', color: '#666' }}>Tedavi önerilerinizi kişiselleştirmek için lütfen yaşam tarzınızla ilgili soruları yanıtlayın.</p>
 
@@ -890,7 +1453,7 @@ function SuggestionPage() {
           </div>
 
           {/* Lifestyle Tab Content */}
-          <div>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
             {activeLifestyleTab === 'Beslenme' && (
               <div>
                 {/* Beslenme Alışkanlıkları */}
@@ -898,9 +1461,20 @@ function SuggestionPage() {
 
                 {/* Soru 1: Günde kaç öğün? */}
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <p style={{ marginBottom: '0.5rem', color: '#222' }}>Günde kaç öğün yemek yiyorsunuz?</p>
+                  <p style={{ marginBottom: '0.5rem', color: '#222', fontSize: '1rem', fontWeight: '500' }}>Günde kaç öğün yemek yiyorsunuz?</p>
                   <select
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.75rem', 
+                      borderRadius: '8px', 
+                      border: '1px solid #ddd',
+                      backgroundColor: 'white',
+                      fontSize: '1rem',
+                      color: '#333',
+                      maxWidth: '400px',
+                      margin: '0 auto',
+                      display: 'block'
+                    }}
                     value={lifestyleDetails.ogunSayisi || ''}
                     onChange={(e) => setLifestyleDetails({ ...lifestyleDetails, ogunSayisi: e.target.value })}
                   >
@@ -914,10 +1488,21 @@ function SuggestionPage() {
 
                 {/* Soru 2: Su tüketimi? */}
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <p style={{ marginBottom: '0.5rem', color: '#222' }}>Su tüketiminiz günde ortalama ne kadar?</p>
+                  <p style={{ marginBottom: '0.5rem', color: '#222', fontSize: '1rem', fontWeight: '500' }}>Su tüketiminiz günde ortalama ne kadar?</p>
                   <select
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                     value={lifestyleDetails.suTuketimi || ''}
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.75rem', 
+                      borderRadius: '8px', 
+                      border: '1px solid #ddd',
+                      backgroundColor: 'white',
+                      fontSize: '1rem',
+                      color: '#333',
+                      maxWidth: '400px',
+                      margin: '0 auto',
+                      display: 'block'
+                    }}
+                    value={lifestyleDetails.suTuketimi || ''}
                     onChange={(e) => setLifestyleDetails({ ...lifestyleDetails, suTuketimi: e.target.value })}
                   >
                     <option value="">Seçiniz</option>
@@ -930,115 +1515,145 @@ function SuggestionPage() {
 
                 {/* Soru 3: Beslenme tarzı? */}
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <p style={{ marginBottom: '0.5rem', color: '#222' }}>Beslenme tarzınızı en iyi hangisi tanımlar?</p>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <label style={{ flex: 1, border: '1px solid #eee', padding: '1rem', borderRadius: '8px', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)' }}>
-                      <input
-                        type="radio"
-                        name="beslenme_tarzi"
-                        value="Karışık Beslenme"
-                         checked={lifestyleDetails.beslenmeTarzi === 'Karışık Beslenme' || false}
-                         onChange={(e) => setLifestyleDetails({ ...lifestyleDetails, beslenmeTarzi: e.target.value })}
-                        style={{ marginRight: '0.5rem' }}
-                      />
-                      <strong>Karışık Beslenme</strong>
-                      <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.2rem' }}>Et, sebze, meyve, tahıl gibi çeşitli besinleri tüketiyorum.</p>
-                    </label>
-                    <label style={{ flex: 1, border: '1px solid #eee', padding: '1rem', borderRadius: '8px', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)' }}>
-                      <input
-                        type="radio"
-                        name="beslenme_tarzi"
-                        value="Vejetaryen"
-                         checked={lifestyleDetails.beslenmeTarzi === 'Vejetaryen' || false}
-                         onChange={(e) => setLifestyleDetails({ ...lifestyleDetails, beslenmeTarzi: e.target.value })}
-                        style={{ marginRight: '0.5rem' }}
-                      />
-                      <strong>Vejetaryen</strong>
-                      <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.2rem' }}>Et tüketmiyorum, ancak süt ürünleri ve yumurta tüketiyorum.</p>
-                    </label>
-                    <label style={{ flex: 1, border: '1px solid #eee', padding: '1rem', borderRadius: '8px', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)' }}>
-                      <input
-                        type="radio"
-                        name="beslenme_tarzi"
-                        value="Vegan"
-                         checked={lifestyleDetails.beslenmeTarzi === 'Vegan' || false}
-                         onChange={(e) => setLifestyleDetails({ ...lifestyleDetails, beslenmeTarzi: e.target.value })}
-                        style={{ marginRight: '0.5rem' }}
-                      />
-                      <strong>Vegan</strong>
-                      <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.2rem' }}>Hiçbir hayvansal gıda tüketmiyorum.</p>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Soru 4: Düzenli tüketilenler? */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <p style={{ marginBottom: '0.5rem', color: '#222' }}>Aşağıdaki besinlerden hangilerini düzenli olarak tüketiyorsunuz?</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem' }}>
-                    {['Yeşil yapraklı sebzeler', 'Meyveler', 'Tam tahıllı ürünler', 'Kuruyemişler ve tohumlar', 'Baklagiller', 'Balık', 'Probiyotik gıdalar (yoğurt, kefir vb.)', 'Zeytinyağı'].map((option) => (
-                      <label key={option} style={{ marginRight: '1rem' }}>
+                  <p style={{ marginBottom: '0.5rem', color: '#222', fontSize: '1rem', fontWeight: '500' }}>Beslenme tarzınızı en iyi hangisi tanımlar?</p>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                    gap: '1rem',
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                  }}>
+                    {['Karışık Beslenme', 'Vejetaryen', 'Vegan'].map((option) => (
+                      <label key={option} style={{ 
+                        border: `1px solid ${lifestyleDetails.beslenmeTarzi === option ? '#4CAF50' : '#eee'}`,
+                        padding: '1.5rem',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
+                        cursor: 'pointer',
+                        backgroundColor: lifestyleDetails.beslenmeTarzi === option ? '#e8f5e9' : 'white',
+                        transition: 'all 0.2s ease-in-out',
+                      }}>
                         <input
-                          type="checkbox"
-                          name="duzenli_tuketim"
+                          type="radio"
+                          name="beslenme_tarzi"
                           value={option}
-                           checked={lifestyleDetails.duzenliTuketim?.includes(option) || false}
-                           onChange={(e) => {
-                             const checked = e.target.checked;
-                             const value = e.target.value;
-                             setLifestyleDetails(prevDetails => {
-                               const duzenliArray = prevDetails.duzenliTuketim || [];
-                               if (checked) {
-                                 return { ...prevDetails, duzenliTuketim: [...duzenliArray, value] };
-                               } else {
-                                 return { ...prevDetails, duzenliTuketim: duzenliArray.filter(item => item !== value) };
-                               }
-                             });
-                           }}
-                          style={{ marginRight: '0.5rem' }}
-                        /> {option}
+                          checked={lifestyleDetails.beslenmeTarzi === option || false}
+                          onChange={(e) => setLifestyleDetails({ ...lifestyleDetails, beslenmeTarzi: e.target.value })}
+                          style={{ marginRight: '0.75rem' }}
+                        />
+                        <strong style={{ fontSize: '1.1rem', color: '#333' }}>{option}</strong>
+                        <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                          {option === 'Karışık Beslenme' ? 'Et, sebze, meyve, tahıl gibi çeşitli besinleri tüketiyorum.' :
+                           option === 'Vejetaryen' ? 'Et tüketmiyorum, ancak süt ürünleri ve yumurta tüketiyorum.' :
+                           'Hiçbir hayvansal gıda tüketmiyorum.'}
+                        </p>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                 {/* Soru 5: Sık tüketilenler? */}
+                {/* Soru 4: Düzenli tüketilenler? */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <p style={{ marginBottom: '0.5rem', color: '#222', fontSize: '1rem', fontWeight: '500' }}>Aşağıdaki besinlerden hangilerini düzenli olarak tüketiyorsunuz?</p>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                    gap: '1rem',
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                  }}>
+                    {['Yeşil yapraklı sebzeler', 'Meyveler', 'Tam tahıllı ürünler', 'Kuruyemişler ve tohumlar', 'Baklagiller', 'Balık', 'Probiyotik gıdalar (yoğurt, kefir vb.)', 'Zeytinyağı'].map((option) => (
+                      <label key={option} style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '0.75rem',
+                        border: `1px solid ${lifestyleDetails.duzenliTuketim?.includes(option) ? '#4CAF50' : '#eee'}`,
+                        borderRadius: '8px',
+                        backgroundColor: lifestyleDetails.duzenliTuketim?.includes(option) ? '#e8f5e9' : 'white',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out',
+                      }}>
+                        <input
+                          type="checkbox"
+                          name="duzenli_tuketim"
+                          value={option}
+                          checked={lifestyleDetails.duzenliTuketim?.includes(option) || false}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const value = e.target.value;
+                            setLifestyleDetails(prevDetails => {
+                              const duzenliArray = prevDetails.duzenliTuketim || [];
+                              if (checked) {
+                                return { ...prevDetails, duzenliTuketim: [...duzenliArray, value] };
+                              } else {
+                                return { ...prevDetails, duzenliTuketim: duzenliArray.filter(item => item !== value) };
+                              }
+                            });
+                          }}
+                          style={{ marginRight: '0.75rem' }}
+                        />
+                        <span style={{ fontSize: '0.95rem', color: '#333' }}>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Soru 5: Sık tüketilenler? */}
                 <div style={{ marginBottom: '2rem' }}>
-                  <p style={{ marginBottom: '0.5rem', color: '#222' }}>Aşağıdaki besinlerden hangilerini sık tüketiyorsunuz?</p>
-                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem' }}>
+                  <p style={{ marginBottom: '0.5rem', color: '#222', fontSize: '1rem', fontWeight: '500' }}>Aşağıdaki besinlerden hangilerini sık tüketiyorsunuz?</p>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                    gap: '1rem',
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                  }}>
                     {['İşlenmiş gıdalar', 'Şekerli içecekler', 'Fast food', 'Tatlılar ve şekerli atıştırmalıklar', 'Alkollü içecekler', 'Kafeinli içecekler'].map((option) => (
-                       <label key={option} style={{ marginRight: '1rem' }}>
-                         <input
-                           type="checkbox"
-                           name="sik_tuketim"
-                           value={option}
-                           checked={lifestyleDetails.sikTuketim?.includes(option) || false}
-                            onChange={(e) => {
-                              const checked = e.target.checked;
-                              const value = e.target.value;
-                              setLifestyleDetails(prevDetails => {
-                                const sikArray = prevDetails.sikTuketim || [];
-                                if (checked) {
-                                  return { ...prevDetails, sikTuketim: [...sikArray, value] };
-                                } else {
-                                  return { ...prevDetails, sikTuketim: sikArray.filter(item => item !== value) };
-                                }
-                              });
-                            }}
-                           style={{ marginRight: '0.5rem' }}
-                         /> {option}
-                       </label>
-                     ))}
+                      <label key={option} style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '0.75rem',
+                        border: `1px solid ${lifestyleDetails.sikTuketim?.includes(option) ? '#4CAF50' : '#eee'}`,
+                        borderRadius: '8px',
+                        backgroundColor: lifestyleDetails.sikTuketim?.includes(option) ? '#e8f5e9' : 'white',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out',
+                      }}>
+                        <input
+                          type="checkbox"
+                          name="sik_tuketim"
+                          value={option}
+                          checked={lifestyleDetails.sikTuketim?.includes(option) || false}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const value = e.target.value;
+                            setLifestyleDetails(prevDetails => {
+                              const sikArray = prevDetails.sikTuketim || [];
+                              if (checked) {
+                                return { ...prevDetails, sikTuketim: [...sikArray, value] };
+                              } else {
+                                return { ...prevDetails, sikTuketim: sikArray.filter(item => item !== value) };
+                              }
+                            });
+                          }}
+                          style={{ marginRight: '0.75rem' }}
+                        />
+                        <span style={{ fontSize: '0.95rem', color: '#333' }}>{option}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
 
                  {/* Beslenme Önerileri */}
                  <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#222' }}>Beslenme Önerileri</h3>
-                 <div style={{ backgroundColor: '#e8f5e9', border: '1px solid #c8e6c9', borderRadius: '8px', padding: '1rem', marginBottom: '2rem' }}>
-                   <p style={{ color: '#388e3c', fontWeight: 'bold', marginBottom: '0.5rem' }}>ℹ️ Şikayetlerinize ve tedavi önerilerinize göre, aşağıdaki beslenme planı öneriliyor. Bu öneriler, tedavi sürecinizi destekleyecek ve genel sağlığınızı iyileştirecektir.</p>
-                 </div>
-
-                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                   {/* Tüketilmesi Önerilenler */}
+                 <div style={{ 
+                   display: 'grid', 
+                   gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                   gap: '1.5rem',
+                   maxWidth: '1200px',
+                   margin: '0 auto',
+                   padding: '0 1rem',
+                 }}>
                    <div style={{ backgroundColor: '#e8f5e9', borderTop: '5px solid #4CAF50', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)' }}>
                      <h4 style={{ fontSize: '1.2rem', color: '#4CAF50', marginBottom: '1rem' }}>Tüketilmesi Önerilenler</h4>
                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -1312,7 +1927,11 @@ function SuggestionPage() {
 
        {/* Step 4: Suggestions */}
        {currentStep === 4 && (
-        <section className="container" style={{ padding: '2rem 0' }}>
+        <section className="container" style={{ 
+          padding: '2rem 0',
+          maxWidth: '1200px',
+          margin: '0 auto',
+        }}>
           <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#222' }}>Tedavi Önerileri</h2>
           <p style={{ marginBottom: '2rem', color: '#666' }}>Semptomlarınız ve yaşam tarzınız değerlendirilerek size özel tedavi önerileri aşağıda listelenmiştir.</p>
 
@@ -1321,10 +1940,13 @@ function SuggestionPage() {
 
           {/* Tedavi önerileri buraya gelecek */}
           {suggestions.length > 0 ? (
-            <div style={{ /* Add grid or flex styles for layout if needed */
-               display: 'grid',
-               gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', // Responsive grid
-               gap: '1.5rem',
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '1.5rem',
+              maxWidth: '1200px',
+              margin: '0 auto',
+              padding: '0 1rem',
             }}>
               {suggestions.map((suggestion, index) => (
                 <div key={index} style={{
@@ -1351,7 +1973,13 @@ function SuggestionPage() {
       )}
 
       {/* Navigation Buttons */}
-      <div className="container" style={{ padding: '2rem 0', display: 'flex', justifyContent: 'space-between' }}>
+      <div className="container" style={{ 
+        padding: '2rem 0', 
+        display: 'flex', 
+        justifyContent: 'space-between',
+        maxWidth: '1200px',
+        margin: '0 auto',
+      }}>
         <button
           onClick={handleBack}
           disabled={currentStep === 1}
