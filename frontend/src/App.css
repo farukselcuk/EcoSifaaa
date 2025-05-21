@@ -1,0 +1,39 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  background: #f4f6f8;
+  color: #222;
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #222;
+  margin-top: 0;
+}
+
+.App {
+  /* Anasayfa içeriğini ortalamak için stil */
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* Header ve Footer hariç içeriği sarmalayan div kaldırıldı, 
+     bu stil App.jsx'in doğrudan render ettiği bölümleri etkileyecek */
+}
+
+/* Varsayılan Vite + React stilleri (kaldırıldı) */
+/* .logo { ... } */
+/* @keyframes logo-spin { ... } */
+/* @media (prefers-reduced-motion: no-preference) { ... } */
+/* .card { ... } */
+/* .read-the-docs { ... } */

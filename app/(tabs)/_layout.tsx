@@ -11,24 +11,24 @@ export default function TabLayout() {
 
   return (
     <>
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-          headerShown: false,
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        headerShown: false,
           tabBarButton: () => null,
           tabBarStyle: { display: 'none' },
         }}
       >
-        <Tabs.Screen
-          name="index"
-          options={{
+      <Tabs.Screen
+        name="index"
+        options={{
             title: 'Anasayfa',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="explore"
-          options={{
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
             title: 'Tedaviler',
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="cross.case.fill" color={color} />,
           }}
@@ -45,9 +45,9 @@ export default function TabLayout() {
           options={{
             title: 'Profil',
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
-          }}
-        />
-      </Tabs>
+        }}
+      />
+    </Tabs>
       <BottomNavBar />
     </>
   );
