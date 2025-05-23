@@ -3,6 +3,8 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
@@ -20,6 +22,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route
                 path="/profile"
                 element={

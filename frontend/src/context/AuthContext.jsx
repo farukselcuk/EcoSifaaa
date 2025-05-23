@@ -3,6 +3,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext();
 
+// Axios instance with base URL
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api' // Backend adresiniz ve portunuz
+});
+
+export { api, AuthContext }; // api değişkenini dışa aktarıyoruz
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       loadUser();
     } else {
       setLoading(false);
@@ -22,11 +29,11 @@ export const AuthProvider = ({ children }) => {
   // Kullanıcı bilgilerini yükle
   const loadUser = async () => {
     try {
-      const res = await axios.get('/api/auth/me');
+      const res = await api.get('/auth/me');
       setUser(res.data.user);
     } catch (err) {
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      delete api.defaults.headers.common['Authorization'];
     }
     setLoading(false);
   };
@@ -34,9 +41,9 @@ export const AuthProvider = ({ children }) => {
   // Kayıt ol
   const register = async (userData) => {
     try {
-      const res = await axios.post('/api/auth/register', userData);
+      const res = await api.post('/auth/register', userData);
       localStorage.setItem('token', res.data.token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
       setUser(res.data.user);
       setError(null);
       return true;
@@ -49,9 +56,9 @@ export const AuthProvider = ({ children }) => {
   // Giriş yap
   const login = async (userData) => {
     try {
-      const res = await axios.post('/api/auth/login', userData);
+      const res = await api.post('/auth/login', userData);
       localStorage.setItem('token', res.data.token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
       setUser(res.data.user);
       setError(null);
       return true;
@@ -64,20 +71,32 @@ export const AuthProvider = ({ children }) => {
   // Çıkış yap
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
   // Profil güncelleme
   const updateProfile = async (userData) => {
     try {
-      const res = await axios.put('/api/auth/profile', userData);
+      const res = await api.put('/auth/profile', userData);
       setUser(res.data.user);
       setError(null);
       return true;
     } catch (err) {
       setError(err.response?.data?.error || 'Profil güncelleme başarısız oldu');
       return false;
+    }
+  };
+
+  // Şifre değiştirme
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      const res = await api.post('/auth/change-password', { currentPassword, newPassword });
+      setError(null);
+      return { success: true, message: res.data.message };
+    } catch (err) {
+      setError(err.response?.data?.error || 'Şifre değiştirme başarısız oldu');
+      return { success: false, message: err.response?.data?.error || 'Şifre değiştirme başarısız oldu' };
     }
   };
 
@@ -90,7 +109,8 @@ export const AuthProvider = ({ children }) => {
         register,
         login,
         logout,
-        updateProfile
+        updateProfile,
+        changePassword
       }}
     >
       {children}

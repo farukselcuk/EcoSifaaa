@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../context/AuthContext'; // api instance'ını import ediyoruz
 
 function SuggestionPage() {
   const [currentStep, setCurrentStep] = useState(1); // Start at step 1
@@ -70,26 +71,25 @@ function SuggestionPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/suggestions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Send all collected data in the request body
-        body: JSON.stringify({ symptoms, symptomDetails, lifestyleDetails }),
+      const response = await api.post('/suggestions', { // api instance'ını kullanıyoruz
+        symptoms, 
+        symptomDetails, 
+        lifestyleDetails
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch suggestions');
-      }
+      // Axios automatically throws for non-2xx status codes by default,
+      // so we can rely on the catch block for network/server errors.
+      // For specific backend validation errors (e.g., 400), backend should return
+      // a JSON with an error message that will be in response.data.
 
-      const data = await response.json();
+      const data = response.data; // axios yanıtı data propertysi içinde gelir
       setSuggestions(data);
       console.log('Fetched suggestions:', data); // Log suggestions for now
 
     } catch (err) {
-      setError(err.message);
+      // err.response?.data?.error will contain the error message from the backend if available
+      // Otherwise, err.message will contain the network error message
+      setError(err.response?.data?.error || err.message || 'Failed to fetch suggestions');
       console.error('Error fetching suggestions:', err);
     } finally {
       setLoading(false);
@@ -101,25 +101,19 @@ function SuggestionPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/suggestions/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          symptoms: selectedSymptoms,
-          symptomDetails: symptomDetails,
-          lifestyleDetails: lifestyleDetails
-        }),
+      const response = await api.post('/suggestions/generate', { // api instance'ını kullanıyoruz
+        symptoms: selectedSymptoms,
+        symptomDetails: symptomDetails,
+        lifestyleDetails: lifestyleDetails
       });
 
-      const data = await response.json();
+      const data = response.data; // axios yanıtı data propertysi içinde gelir
 
-      if (!response.ok) {
+      if (response.status !== 200) { // axios yanıt kontrolü
         throw new Error(data.error || 'Öneriler alınırken bir hata oluştu');
       }
 
-      setSuggestions(data.data);
+      setSuggestions(data.data); // AI servis yanıtı data.data içinde gelebilir
       setCurrentStep(4); // Move to results step
 
     } catch (err) {

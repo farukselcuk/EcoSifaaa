@@ -21,7 +21,7 @@ const Login = () => {
     e.preventDefault();
     const success = await login(formData);
     if (success) {
-      navigate('/profile');
+      navigate('/');
     }
   };
 

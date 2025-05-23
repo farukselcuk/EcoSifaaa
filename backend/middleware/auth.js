@@ -1,52 +1,30 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Kullanıcı authentication kontrolü
-exports.protect = async (req, res, next) => {
+const auth = async (req, res, next) => {
   try {
-    let token;
-
-    // Token'ı header'dan al
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    }
-
-    // Token yoksa hata döndür
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        error: 'Bu işlem için giriş yapmanız gerekmektedir'
-      });
+      throw new Error();
     }
 
-    try {
-      // Token'ı doğrula
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({ _id: decoded.userId });
 
-      // Kullanıcıyı bul
-      req.user = await User.findById(decoded.id);
-
-      if (!req.user) {
-        return res.status(401).json({
-          success: false,
-          error: 'Kullanıcı bulunamadı'
-        });
-      }
-
-      next();
-    } catch (err) {
-      return res.status(401).json({
-        success: false,
-        error: 'Geçersiz token'
-      });
+    if (!user) {
+      throw new Error();
     }
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: 'Sunucu hatası'
-    });
+
+    req.token = token;
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Please authenticate.' });
   }
 };
+
+module.exports = auth;
 
 // Rol bazlı yetkilendirme
 exports.authorize = (...roles) => {

@@ -3,13 +3,8 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const herbRoutes = require('./routes/herbRoutes');
 const mixtureRoutes = require('./routes/mixtureRoutes');
-const userRoutes = require('./routes/userRoutes');
 const suggestionRoutes = require('./routes/suggestionRoutes');
-const passport = require('passport');
-const session = require('express-session');
-
-// Load Passport config
-require('./config/passport')(passport);
+const authRoutes = require('./routes/auth');
 
 dotenv.config();
 
@@ -17,27 +12,29 @@ connectDB();
 
 const app = express();
 
-app.use(express.json()); // Body parser for JSON data
+// Middleware
+app.use(express.json());
 
-// Session Middleware
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'keyboard cat', // Change this secret in production
-  resave: false,
-  saveUninitialized: false,
-}));
-
-// Passport middleware
-app.use(passport.initialize());
-app.use(passport.session());
+// CORS middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
+    return res.status(200).json({});
+  }
+  next();
+});
 
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
+// Routes
 app.use('/api/herbs', herbRoutes);
 app.use('/api/mixtures', mixtureRoutes);
-app.use('/api/users', userRoutes);
 app.use('/api/suggestions', suggestionRoutes);
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 

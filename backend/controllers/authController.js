@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { validationResult } = require('express-validator');
 
 // JWT token oluştur
 const generateToken = (id) => {
@@ -9,101 +11,101 @@ const generateToken = (id) => {
 };
 
 // Kullanıcı kaydı
-exports.register = async (req, res) => {
+const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-
-    // Email kontrolü
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({
-        success: false,
-        error: 'Bu email adresi zaten kullanılıyor'
-      });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // Yeni kullanıcı oluştur
-    const user = await User.create({
-      name,
+    const { username, email, password } = req.body;
+
+    // Check if user already exists
+    let user = await User.findOne({ $or: [{ email }, { username }] });
+    if (user) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create new user
+    user = new User({
+      username,
       email,
-      password
+      password: hashedPassword,
+      role_id: '65f1a1b1c261e6001c3d1234' // Default user role ID
     });
 
-    // Token oluştur
-    const token = generateToken(user._id);
+    await user.save();
+
+    // Create JWT token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     res.status(201).json({
-      success: true,
       token,
       user: {
         id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
+        username: user.username,
+        email: user.email
       }
     });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: 'Sunucu hatası'
-    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
 // Kullanıcı girişi
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { email, password } = req.body;
 
-    // Email ve şifre kontrolü
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Lütfen email ve şifre giriniz'
-      });
-    }
-
-    // Kullanıcıyı bul
+    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: 'Geçersiz email veya şifre'
-      });
+      return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Şifre kontrolü
-    const isMatch = await user.matchPassword(password);
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        error: 'Geçersiz email veya şifre'
-      });
+      return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Token oluştur
-    const token = generateToken(user._id);
+    // Create JWT token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     res.json({
-      success: true,
       token,
       user: {
         id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
+        username: user.username,
+        email: user.email
       }
     });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: 'Sunucu hatası'
-    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
 // Mevcut kullanıcı bilgilerini getir
-exports.getMe = async (req, res) => {
+const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json({
@@ -119,7 +121,7 @@ exports.getMe = async (req, res) => {
 };
 
 // Profil güncelleme
-exports.updateProfile = async (req, res) => {
+const updateProfile = async (req, res) => {
   try {
     const { name, email, profile } = req.body;
     const user = await User.findById(req.user.id);
@@ -170,4 +172,37 @@ exports.updateProfile = async (req, res) => {
       error: 'Sunucu hatası'
     });
   }
+};
+
+// Şifre değiştirme
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Mevcut ve yeni şifre gereklidir.' });
+    }
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+    }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Mevcut şifre yanlış.' });
+    }
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+    res.json({ message: 'Şifre başarıyla güncellendi.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Sunucu hatası' });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getMe,
+  updateProfile,
+  changePassword
 }; 

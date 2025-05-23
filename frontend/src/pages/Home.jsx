@@ -24,12 +24,24 @@ const Home = () => {
           <p className="mt-6 text-xl text-green-100 max-w-3xl">
             Alternatif tıp yöntemleriyle sağlığınıza kavuşun. Kişiselleştirilmiş öneriler ve doğal tedavi yöntemleriyle yanınızdayız.
           </p>
-          <div className="mt-10">
+          <div className="mt-10 flex space-x-4">
             <Link
               to="/suggestions"
               className="inline-block bg-white py-3 px-8 border border-transparent rounded-md text-base font-medium text-green-700 hover:bg-green-50"
             >
               Tedavi Önerileri Al
+            </Link>
+            <Link
+              to="/about"
+              className="inline-block bg-white py-3 px-8 border border-transparent rounded-md text-base font-medium text-green-700 hover:bg-green-50"
+            >
+              Hakkımızda
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-block bg-white py-3 px-8 border border-transparent rounded-md text-base font-medium text-green-700 hover:bg-green-50"
+            >
+              İletişim
             </Link>
           </div>
         </div>
