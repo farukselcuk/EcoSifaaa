@@ -6,7 +6,8 @@ const mixtureSchema = mongoose.Schema({
     required: true,
   },
   benefits: {
-    type: String,
+    type: [String],
+    default: [],
   },
   how_to_use: {
     type: String,
